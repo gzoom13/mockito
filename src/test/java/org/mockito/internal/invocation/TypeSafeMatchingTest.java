@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.internal.matchers.LessOrEqual;
 import org.mockito.internal.matchers.Null;
 import org.mockito.internal.matchers.StartsWith;
+import org.mockito.internal.matchers.VarargMatcher;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.mockitousage.IMethods;
@@ -157,5 +158,65 @@ public class TypeSafeMatchingTest {
         wasCalled.set(false);
         matchesTypeSafe().apply(new GenericMatcher<Integer>(), "");
         assertThat(wasCalled.get()).isTrue();
+    }
+
+    @Test
+    public void matchesVarargWithSingleArgument() {
+        class VarargMatcher implements ArgumentMatcher<String[]>, org.mockito.internal.matchers.VarargMatcher {
+            @Override
+            public boolean matches(String[] argument) {
+                return argument[0].equals("123");
+            }
+        }
+        boolean match = matchesTypeSafe().apply(new VarargMatcher(), "123");
+        assertThat(match).isTrue();
+    }
+
+    @Test
+    public void doesNotMatchVarargWithSingleArgumentOfAnotherType() {
+        class VarargMatcher implements ArgumentMatcher<String[]>, org.mockito.internal.matchers.VarargMatcher {
+            @Override
+            public boolean matches(String[] argument) {
+                return true;
+            }
+        }
+        boolean match = matchesTypeSafe().apply(new VarargMatcher(), 123);
+        assertThat(match).isFalse();
+    }
+
+    @Test
+    public void matchesVarargWithSinglePrimitiveArgument() {
+        class VarargMatcher implements ArgumentMatcher<int[]>, org.mockito.internal.matchers.VarargMatcher {
+            @Override
+            public boolean matches(int[] argument) {
+                return argument[0] == 123;
+            }
+        }
+        boolean match = matchesTypeSafe().apply(new VarargMatcher(), 123);
+        assertThat(match).isTrue();
+    }
+
+    @Test
+    public void matchesVarargWithSingleWrapperArgument() {
+        class VarargMatcher implements ArgumentMatcher<Integer[]>, org.mockito.internal.matchers.VarargMatcher {
+            @Override
+            public boolean matches(Integer[] argument) {
+                return argument[0].equals(123);
+            }
+        }
+        boolean match = matchesTypeSafe().apply(new VarargMatcher(), 123);
+        assertThat(match).isTrue();
+    }
+
+    @Test
+    public void genericVarargMatcher() {
+        class VarargMatcher<T> implements ArgumentMatcher<T[]>, org.mockito.internal.matchers.VarargMatcher {
+            @Override
+            public boolean matches(T[] argument) {
+                return true;
+            }
+        }
+        boolean match = matchesTypeSafe().apply(new VarargMatcher<String>(), "123");
+        assertThat(match).isTrue();
     }
 }

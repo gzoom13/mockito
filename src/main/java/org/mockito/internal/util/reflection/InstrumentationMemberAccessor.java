@@ -26,22 +26,12 @@ import static org.mockito.internal.util.StringUtil.join;
 @SuppressSignatureCheck
 class InstrumentationMemberAccessor implements MemberAccessor {
 
-    private static final Map<Class<?>, Class<?>> WRAPPERS = new HashMap<>();
-
     private static final Instrumentation INSTRUMENTATION;
     private static final Dispatcher DISPATCHER;
 
     private static final Throwable INITIALIZATION_ERROR;
 
     static {
-        WRAPPERS.put(boolean.class, Boolean.class);
-        WRAPPERS.put(byte.class, Byte.class);
-        WRAPPERS.put(short.class, Short.class);
-        WRAPPERS.put(char.class, Character.class);
-        WRAPPERS.put(int.class, Integer.class);
-        WRAPPERS.put(long.class, Long.class);
-        WRAPPERS.put(float.class, Float.class);
-        WRAPPERS.put(double.class, Double.class);
         Instrumentation instrumentation;
         Dispatcher dispatcher;
         Throwable throwable;
@@ -381,7 +371,7 @@ class InstrumentationMemberAccessor implements MemberAccessor {
                                     + target);
                 }
             } else {
-                Class<?> resolved = WRAPPERS.getOrDefault(types[index], types[index]);
+                Class<?> resolved = PrimitiveWrappers.getOrDefault(types[index], types[index]);
                 if (!resolved.isAssignableFrom(values[index].getClass())) {
                     throw new IllegalArgumentException(
                             "Cannot assign value of type "
